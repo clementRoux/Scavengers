@@ -15,6 +15,14 @@ public class Player : MovingObject {
 	private Animator animator;                  //Used to store a reference to the Player's animator component.
 	private int food;                           //Used to store player food points total during level.
 
+	public AudioClip moveSound1;				//1 of 2 Audio clips to play when player moves.
+	public AudioClip moveSound2;				//2 of 2 Audio clips to play when player moves.
+	public AudioClip eatSound1;					//1 of 2 Audio clips to play when player collects a food object.
+	public AudioClip eatSound2;					//2 of 2 Audio clips to play when player collects a food object.
+	public AudioClip drinkSound1;				//1 of 2 Audio clips to play when player collects a soda object.
+	public AudioClip drinkSound2;				//2 of 2 Audio clips to play when player collects a soda object.
+	public AudioClip gameOverSound;				//Audio clip to play when player dies.
+
 	// Use this for initialization
 	protected override void Start () {
 		//Get a component reference to the Player's animator component
@@ -51,9 +59,10 @@ public class Player : MovingObject {
 		RaycastHit2D hit;
 
 		//If Move returns true, meaning Player was able to move into an empty space.
-		//if (Move (xDir, yDir, out hit)) {
+		if (Move (xDir, yDir, out hit)) {
 			//Call RandomizeSfx of SoundManager to play the move sound, passing in two audio clips to choose from.
-		//}
+			SoundManager.instance.RandomizeSfx (moveSound1, moveSound2);
+		}
 
 		//Since the player has moved and lost food points, check if the game has ended.
 		CheckIfGameOver ();
@@ -121,6 +130,8 @@ public class Player : MovingObject {
 			//Add pointsPerFood to the players current food total.
 			food += pointsPerFood;
 			foodText.text = "+" + pointsPerFood + " Food : " + food;
+			//Call the RandomizeSfx function of SoundManager and pass in two eating sounds to choose between to play the eating sound effect.
+			SoundManager.instance.RandomizeSfx (eatSound1, eatSound2);
 			//Disable the food object the player collided with.
 			other.gameObject.SetActive (false);
 		}
@@ -131,6 +142,8 @@ public class Player : MovingObject {
 			food += pointsPerSoda;
 			foodText.text = "+" + pointsPerSoda + " Food : " + food;
 
+			//Call the RandomizeSfx function of SoundManager and pass in two drinking sounds to choose between to play the drinking sound effect.
+			SoundManager.instance.RandomizeSfx (drinkSound1, drinkSound2);
 
 			//Disable the soda object the player collided with.
 			other.gameObject.SetActive (false);
@@ -164,6 +177,12 @@ public class Player : MovingObject {
 		
 		//Check if food point total is less than or equal to zero.
 		if (food <= 0) {
+			//Call the PlaySingle function of SoundManager and pass it the gameOverSound as the audio clip to play.
+			SoundManager.instance.PlaySingle (gameOverSound);
+
+			//Stop the background music.
+			SoundManager.instance.musicSource.Stop();
+
 			//Call the GameOver function of GameManager.
 			GameManager.instance.GameOver ();
 		}
